@@ -1,0 +1,12 @@
+:root {
+    --base-color: #000;
+    --grid-border: 1px solid var(--base-color);
+    --font-size-default: 14px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: arial;
+    font-size: var(--font-size-default);
+}
