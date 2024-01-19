@@ -1,12 +1,18 @@
 :root {
     --base-color: #000;
-    --grid-border: 1px solid var(--base-color);
+    --border-color: #888;
+    --grid-border: 1px solid var(--border-color);
     --font-size-default: 14px;
 }
 
-body {
+html, body {
     margin: 0;
     padding: 0;
     font-family: arial;
     font-size: var(--font-size-default);
+    height: 100%;
+}
+
+#app {
+    height: 100%;
 }

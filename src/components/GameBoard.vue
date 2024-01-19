@@ -1,6 +1,6 @@
 <template>
-<div class="field_container">
-  <div class="field">
+<div class="field" ref="fieldContainer">
+  <div class="field__inner">
     <div
       v-for="(cellsRow, rowIndex) in cells"
       :key="`key_${rowIndex}`"
@@ -23,25 +23,21 @@
 import { ref, watch, onMounted } from 'vue';
 import type { GameBoardProps } from '@/types/index.ts';
 
-const props = withDefaults(defineProps<GameBoardProps>(), {
-  size: 10,
-  editMode: true,
-})
+const props = defineProps<GameBoardProps>();
 
-const cellSize = '20px';
+const emit = defineEmits<{
+  'updated-cells': [cells: boolean[][]]
+}>()
+
+const cellSize = ref<string>('0px');
+const fieldContainer = ref<HTMLDivElement | null>(null);
 const cells = ref<boolean[][]>([]);
-const previousCellsState = ref<boolean[][]>([]);;
 
-// если изменился размер поля - перегенерируем его
+// если изменился размер поля - перегенерируем его и изменим размер ячеек
 watch(() => props.size, () => {
   initField();
-});
-
-// если отключили режим расстановки живых клеток (нажали кнопку "Начать") - начинаем игру
-watch(() => props.editMode, (newVal) => {
-  if (!newVal) {
-    setInterval(updateGameState, 200);
-  }
+  emit('updated-cells', cells.value);
+  setCellSize();
 });
 
 // генерация пустого поля
@@ -55,87 +51,39 @@ const initField = (): void => {
   }
 }
 
+// устанавливаем размер ячеек
+const setCellSize = (): void => {
+  if (!fieldContainer.value) {
+    cellSize.value = '0px';
+    return;
+  }
+  const containerHeight = fieldContainer.value.clientHeight;
+  const cellsCount = props.size;
+  cellSize.value = String(containerHeight / cellsCount) + 'px';
+};
+
 // меняем состояние клетки при клике на неё
 const changeCell = (row: number, cell: number): void => {
   if (!props.editMode) {
     return;
   }
   cells.value[row][cell] = !cells.value[row][cell];
-}
-
-// получаем индексы соседних рядов и колонок с учётом границ игровой сетки
-const getNearbyIndexes = (item: number): [number, number] => {
-    const { size } = props;
-    const upperOrLeft = (item - 1) < 0 ? (size - 1) : (item - 1);
-    const lowerOrRight = (item + 1) > (size - 1) ? 0 : (item + 1);
-    return [upperOrLeft, lowerOrRight];
-}
-
-// получаем количество живых соседних клеток
-const getAliveSiblingsCount = (row: number, column: number): number => {
-  let aliveCellsCount = 0;
-  
-  const [upperRowIndex, lowerRowIndex] = getNearbyIndexes(row);
-  const [leftColumnIndex, rightColumnIndex] = getNearbyIndexes(column);
-
-
-  if (previousCellsState.value[upperRowIndex][leftColumnIndex]) {
-    aliveCellsCount += 1;
-  }
-  if (previousCellsState.value[upperRowIndex][column]) {
-    aliveCellsCount += 1;
-  }
-  if (previousCellsState.value[upperRowIndex][rightColumnIndex]) {
-    aliveCellsCount += 1;
-  }
-  if (previousCellsState.value[row][leftColumnIndex]) {
-    aliveCellsCount += 1;
-  }
-  if (previousCellsState.value[row][rightColumnIndex]) {
-    aliveCellsCount += 1;
-  }
-  if (previousCellsState.value[lowerRowIndex][leftColumnIndex]) {
-    aliveCellsCount += 1;
-  }
-  if (previousCellsState.value[lowerRowIndex][column]) {
-    aliveCellsCount += 1;
-  }
-  if (previousCellsState.value[lowerRowIndex][rightColumnIndex]) {
-    aliveCellsCount += 1;
-  }
-
-  return aliveCellsCount;
-}
-
-const updateGameState = (): void => {
-  previousCellsState.value = JSON.parse(JSON.stringify(cells.value));
-
-  previousCellsState.value.forEach((row, rowIndex) => {
-    row.forEach((cell, cellIndex) => {
-      const aliveSiblings = getAliveSiblingsCount(rowIndex, cellIndex);
-      // если это мёртвая клетка и рядом есть три живые - в ней зараждается жизнь
-      if (aliveSiblings === 3 && !cell) {
-        cells.value[rowIndex][cellIndex] = true;
-      }
-      // клетка умирает от перенаселенности или одиночества
-      if ((aliveSiblings < 2 || aliveSiblings > 3) && cell) {
-        cells.value[rowIndex][cellIndex] = false;
-      }
-    });
-  });
+  emit('updated-cells', cells.value);
 }
 
 onMounted((): void => {
   initField();
+  setCellSize();
+  window.addEventListener('resize', setCellSize);
 })
 </script>
 
 <style scoped>
-.field_container {
-  display: flex;
-  justify-content: center;
-}
 .field {
+  display: flex;
+  flex: auto;
+}
+.field__inner {
   border-top: var(--grid-border);
   border-left: var(--grid-border);
 }
@@ -145,6 +93,7 @@ onMounted((): void => {
   width: 100%;
   height: v-bind(cellSize);
   border-bottom: var(--grid-border);
+  box-sizing: border-box;
 }
 
 .field__cell {
@@ -157,9 +106,9 @@ onMounted((): void => {
 }
 
 .field__dot {
-  width: 50%;
-  height: 50%;
-  border-radius: 100%;
+  width: 100%;
+  height: 100%;
   background: var(--base-color);
 }
 </style>
+@/composables/gameProcess
