@@ -1,5 +1,7 @@
 # Игра "Жизнь"
 
+<img src="https://github.com/buravlev-arthur/game-of-life/assets/14940878/0ac12d81-bc36-48ae-a879-442d4326ead0" alt="Game of Life Screenshot" width="200" />
+
 Тестовое задание на позицию "Фронтенд-разработчик". Графическая реализация [игры "Жизнь" Джона Конвея](https://ru.wikipedia.org/wiki/%D0%98%D0%B3%D1%80%D0%B0_%C2%AB%D0%96%D0%B8%D0%B7%D0%BD%D1%8C%C2%BB).
 
 Демо: [http://188.225.84.218:83](http://188.225.84.218:83)
