@@ -82,6 +82,7 @@ onMounted((): void => {
 .field {
   display: flex;
   flex: auto;
+  height: 600px;
 }
 .field__inner {
   border-top: var(--grid-border);

@@ -37,7 +37,7 @@ const {
 } = useGameProcess(cells, generationSpeed, fieldSize);
 
 const changeSize = (size: number): void => {
-  if (typeof size !== 'number') {
+  if (typeof size !== 'number' || size < 1) {
     fieldSize.value = 1;
     return;
   }
@@ -45,6 +45,10 @@ const changeSize = (size: number): void => {
 }
 
 const changeSpeed = (speed: number): void => {
+  if (typeof speed !== 'number' || speed < 0) {
+    generationSpeed.value = 0;
+    return;
+  }
   generationSpeed.value = speed;
 }
 
